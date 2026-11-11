@@ -165,6 +165,7 @@ videoCards.forEach(card => {
 
 // Inline release details: move the selected article first in its own group so
 // visual and keyboard order agree; restore the saved order on collapse.
+const releaseArtToggle = releaseDetails.querySelector('#release-art-toggle');
 const releaseCards = [...document.querySelectorAll('.release-card')];
 const releaseGroups = [...document.querySelectorAll('.release-grid')].map(grid => ({
   grid, cards: releaseCards.filter(card => card.parentElement === grid)
@@ -240,12 +241,13 @@ const closeRelease = () => {
   const card = activeRelease;
   animateReleaseLayout(() => {
     releaseDetails.hidden = true;
+    releaseArtToggle.setAttribute('aria-expanded', 'false');
     resetRelease(card);
     activeRelease = null;
   }, card);
   card.querySelector('[data-release-id]').focus({ preventScroll: true });
 };
-releaseDetails.querySelector('button').addEventListener('click', closeRelease);
+releaseArtToggle.addEventListener('click', closeRelease);
 releaseDetails.addEventListener('keydown', event => {
   if (event.key === 'Escape') {
     event.preventDefault();
@@ -273,11 +275,13 @@ releaseCards.forEach(card => {
       renderRelease(release, link);
       card.append(releaseDetails);
       releaseDetails.hidden = false;
+      releaseArtToggle.setAttribute('aria-expanded', 'true');
+      releaseArtToggle.setAttribute('aria-label', 'Collapse details for ' + release.title);
       link.hidden = true;
       link.setAttribute('aria-expanded', 'true');
       card.querySelector('.release-meta').hidden = true;
       card.classList.add('is-expanded');
     }, card);
-    releaseDetails.querySelector('button').focus({ preventScroll: true });
+    releaseArtToggle.focus({ preventScroll: true });
   });
 });

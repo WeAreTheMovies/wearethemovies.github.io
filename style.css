@@ -217,7 +217,8 @@
 .release-grid>.release-card.is-expanded{flex-basis:100%;width:100%;position:relative;z-index:1}
 .release-card>[hidden],.release-inline-details[hidden]{display:none!important}
 .release-inline-details{width:100%;max-width:none;max-height:none;padding:24px 32px 32px;overflow:visible;border:1px solid var(--line);background:#e7e5db}
-.release-inline-details .dialog-close{position:relative;top:auto;display:block;min-height:44px;margin-left:auto}
+.release-inline-details #release-art-toggle{display:block;width:100%;max-width:420px;margin:0 auto;padding:0;border:0;background:transparent;color:inherit;cursor:pointer}
+.release-inline-details #release-art-toggle:focus-visible{outline:3px solid var(--ink);outline-offset:5px}
 .release-inline-details .release-dialog-grid{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:38px}
 .release-inline-details .release-dialog-sidebar{min-width:0}
 .release-inline-details #release-dialog-art{width:100%;max-width:420px;max-height:none;margin:0 auto}
@@ -231,7 +232,7 @@
   .release-grid>.release-card.is-expanded{flex-basis:100%}
   .release-inline-details{padding:16px 18px 24px}
   .release-inline-details .release-dialog-grid{grid-template-columns:minmax(0,1fr);gap:24px}
-  .release-inline-details #release-dialog-art{max-width:320px}
+  .release-inline-details #release-art-toggle,.release-inline-details #release-dialog-art{max-width:320px}
   .release-inline-details .platform-icons{gap:8px}
 }
 @media(prefers-reduced-motion:reduce){.release-art img,.release-play{transition:none}}
