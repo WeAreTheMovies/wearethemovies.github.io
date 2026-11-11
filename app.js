@@ -8,7 +8,7 @@ const openDialog = (dialog, trigger) => {
   dialog.showModal();
   dialog.scrollTop = 0;
 };
-[releaseViewer, pressViewer].filter(Boolean).forEach(dialog => {
+[releaseViewer, pressViewer].forEach(dialog => {
   dialog.querySelector('button').addEventListener('click', () => dialog.close());
   dialog.addEventListener('click', event => { if (event.target === dialog) {
     const box = dialog.getBoundingClientRect();
@@ -76,16 +76,77 @@ document.querySelectorAll('[data-release-id]').forEach(link => link.addEventList
   openDialog(releaseViewer, link);
 }));
 
-// Load the native YouTube player after a play click; only one is active at a time.
-const videoCards = document.querySelectorAll('[data-video-id]');
+// Keep cards in DOM order: wrapping flex rows fill the available width, while
+// the active card takes a whole row. FLIP animates from the actual on-screen
+// rectangles, including interrupted animations, without moving live iframes.
+const videoCards = [...document.querySelectorAll('[data-video-id]')];
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+const videoAnimations = new Map();
+let activeVideo = null;
+const cancelVideoAnimations = () => {
+  videoAnimations.forEach(animation => animation.cancel());
+  videoAnimations.clear();
+};
+reducedMotion.addEventListener('change', cancelVideoAnimations);
+window.addEventListener('resize', cancelVideoAnimations);
+const animateVideoLayout = (change, revealCard = null) => {
+  const before = new Map(videoCards.map(card => [card, card.getBoundingClientRect()]));
+  cancelVideoAnimations();
+  change();
+  // Read final untransformed geometry before starting FLIP. Using the animated
+  // rectangle here would scroll toward the old thumbnail instead of the player.
+  const finalRects = new Map(videoCards.map(card => [card, card.getBoundingClientRect()]));
+  if (revealCard) {
+    const target = finalRects.get(revealCard);
+    const top = target.top + window.scrollY - 20;
+    const visibleHeight = Math.min(target.height, window.innerHeight - 40);
+    if (target.top < 20 || target.top + visibleHeight > window.innerHeight - 20) {
+      window.scrollTo({ top: Math.max(0, top), behavior: reducedMotion.matches ? 'instant' : 'smooth' });
+    }
+  }
+  if (reducedMotion.matches) return;
+  videoCards.forEach(card => {
+    const first = before.get(card);
+    const last = finalRects.get(card);
+    if (!last.width || !last.height) return;
+    const animation = card.animate([
+      { transform: `translate(${first.left - last.left}px, ${first.top - last.top}px) scale(${first.width / last.width}, ${first.height / last.height})` },
+      { transform: 'none' }
+    ], { duration: 520, easing: 'cubic-bezier(.22, 1, .36, 1)' });
+    videoAnimations.set(card, animation);
+    animation.onfinish = () => {
+      if (videoAnimations.get(card) === animation) videoAnimations.delete(card);
+    };
+  });
+};
+const resetVideo = card => {
+  card.querySelector('iframe')?.remove();
+  const poster = card.querySelector('.video-poster');
+  poster.hidden = false;
+  poster.setAttribute('aria-expanded', 'false');
+  card.querySelector('.video-collapse').hidden = true;
+  card.classList.remove('is-playing');
+};
 videoCards.forEach(card => {
   const poster = card.querySelector('.video-poster');
+  const stage = card.querySelector('.video-stage');
+  stage.id = `video-stage-${card.dataset.videoId}`;
+  poster.setAttribute('aria-controls', stage.id);
+  poster.setAttribute('aria-expanded', 'false');
+  const collapse = element('button', 'Close theater ×', 'video-collapse');
+  collapse.type = 'button';
+  collapse.hidden = true;
+  collapse.setAttribute('aria-label', 'Close theater for ' + card.querySelector('h3').textContent);
+  card.querySelector('.video-actions').append(collapse);
+  collapse.addEventListener('click', () => {
+    animateVideoLayout(() => {
+      resetVideo(card);
+      activeVideo = null;
+    }, card);
+    poster.focus({ preventScroll: true });
+  });
   poster.addEventListener('click', () => {
-    videoCards.forEach(other => {
-      other.querySelector('iframe')?.remove();
-      other.querySelector('.video-poster').hidden = false;
-      other.classList.remove('is-playing');
-    });
+    if (activeVideo === card) return;
     const frame = document.createElement('iframe');
     const origin = /^https?:$/.test(location.protocol) ? '&origin=' + encodeURIComponent(location.origin) : '';
     frame.src = `https://www.youtube-nocookie.com/embed/${card.dataset.videoId}?autoplay=1&controls=1&rel=0&playsinline=1${origin}`;
@@ -93,9 +154,15 @@ videoCards.forEach(card => {
     frame.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen';
     frame.allowFullscreen = true;
     frame.referrerPolicy = 'strict-origin-when-cross-origin';
-    poster.hidden = true;
-    card.querySelector('.video-stage').append(frame);
-    card.classList.add('is-playing');
-    frame.focus();
+    animateVideoLayout(() => {
+      if (activeVideo) resetVideo(activeVideo);
+      activeVideo = card;
+      poster.hidden = true;
+      poster.setAttribute('aria-expanded', 'true');
+      collapse.hidden = false;
+      stage.append(frame);
+      card.classList.add('is-playing');
+    }, card);
+    frame.focus({ preventScroll: true });
   });
 });
