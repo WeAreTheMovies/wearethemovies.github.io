@@ -206,3 +206,32 @@
 .video-actions .video-collapse:hover{background:#ffffff12}
 @media(max-width:900px){.other-videos .video-card{flex-basis:calc((100% - 51px)/4)}}
 @media(max-width:760px){.featured-videos .video-card{flex-basis:100%}.other-videos .video-card{flex-basis:calc((100% - 14px)/2)}.video-grid .video-card.is-playing{flex-basis:100%}}
+
+/* Inline Music details. Only the selected group reflows; original thumbnail
+   grids remain unchanged when closed. Balanced desktop rows avoid singletons. */
+.release-card{min-width:0;transform-origin:top left}
+.release-grid{overflow-anchor:none}
+.release-grid.has-expanded-release{display:flex;flex-wrap:wrap;align-items:flex-start;--release-gap:22px;column-gap:var(--release-gap)}
+.featured-releases.has-expanded-release{--release-gap:26px}
+.has-expanded-release>.release-card{flex:0 0 calc((100% - (var(--release-columns,4) - 1)*var(--release-gap))/var(--release-columns,4))}
+.release-grid>.release-card.is-expanded{flex-basis:100%;width:100%;position:relative;z-index:1}
+.release-card>[hidden],.release-inline-details[hidden]{display:none!important}
+.release-inline-details{width:100%;max-width:none;max-height:none;padding:24px 32px 32px;overflow:visible;border:1px solid var(--line);background:#e7e5db}
+.release-inline-details .dialog-close{position:relative;top:auto;display:block;min-height:44px;margin-left:auto}
+.release-inline-details .release-dialog-grid{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:38px}
+.release-inline-details .release-dialog-sidebar{min-width:0}
+.release-inline-details #release-dialog-art{width:100%;max-width:420px;max-height:none;margin:0 auto}
+.release-inline-details .release-dialog-body{min-width:0}
+.release-inline-details .platform-icons a{min-width:44px;min-height:44px}
+.release-inline-details h2{font-size:clamp(30px,3.8vw,50px);overflow-wrap:anywhere}
+@media(max-width:760px){
+  .release-grid.has-expanded-release{--release-gap:14px}
+  .featured-releases.has-expanded-release{--release-gap:13px}
+  .has-expanded-release>.release-card{flex-grow:1;flex-basis:calc((100% - var(--release-gap))/2)}
+  .release-grid>.release-card.is-expanded{flex-basis:100%}
+  .release-inline-details{padding:16px 18px 24px}
+  .release-inline-details .release-dialog-grid{grid-template-columns:minmax(0,1fr);gap:24px}
+  .release-inline-details #release-dialog-art{max-width:320px}
+  .release-inline-details .platform-icons{gap:8px}
+}
+@media(prefers-reduced-motion:reduce){.release-art img,.release-play{transition:none}}
