@@ -236,3 +236,11 @@
   .release-inline-details .platform-icons{gap:8px}
 }
 @media(prefers-reduced-motion:reduce){.release-art img,.release-play{transition:none}}
+
+/* Homepage merch link and group-photo framing. */
+.hero-merch{display:inline-flex;align-items:center;justify-content:space-between;gap:40px;margin-top:27px;padding:16px 23px;background:var(--accent);color:var(--ink);font-size:14px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;border:2px solid var(--accent);position:relative;z-index:4;transition:background .18s,color .18s}
+.hero-merch:hover{background:transparent;color:var(--accent)}
+.hero-merch:focus-visible{outline:3px solid var(--paper);outline-offset:5px}
+.instagram-collage img:nth-child(1){object-position:0% center}
+.instagram-collage img:nth-child(2){object-position:55% center}
+.instagram-collage img:nth-child(3){object-position:0% center}
