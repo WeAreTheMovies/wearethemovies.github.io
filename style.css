@@ -244,3 +244,10 @@
 .instagram-collage img:nth-child(1){object-position:0% center}
 .instagram-collage img:nth-child(2){object-position:55% center}
 .instagram-collage img:nth-child(3){object-position:0% center}
+
+/* A simple external store cart; no storefront state is hosted here. */
+.hero-nav .nav-cart{color:var(--accent);width:36px;min-width:36px;min-height:44px;justify-content:center;flex-shrink:0}
+.hero-nav .nav-cart svg{display:block;width:23px;height:23px}
+.hero-nav .nav-cart:hover{color:var(--paper)}
+@media(max-width:760px){.hero-nav{justify-content:space-between;gap:10px}.hero-nav .nav-cart{width:32px;min-width:32px}}
+@media(max-width:380px){.hero-nav{gap:7px}.hero-nav a{letter-spacing:0}}
